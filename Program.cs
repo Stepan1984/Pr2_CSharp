@@ -27,15 +27,16 @@ namespace Pr2
             {
                 return $"{name, 5} | {allMonths[month], 8} | {seedsAmount} | {price} ";
             }
+
+            public int GetMonth() { return month; }
         }
         static void Main(string[] args) 
         {
             string filename = GetFilename(); // получаем имя 
-            FileStream sourceStream = new FileStream(filename, FileMode.OpenOrCreate); // открываем или создаём файл.
             Stack<Plant> stack = new Stack<Plant>(); // создаём стэк
-            ReadFile(ref sourceStream, ref stack); // читаем данные из файла
+            ReadFile(filename, ref stack); // читаем данные из файла
             int menu;
-            ConsoleKey btn;
+            //ConsoleKey btn;
             do
             {
                 Console.Clear();
@@ -80,7 +81,7 @@ namespace Pr2
                         int i = 0;
                         foreach (Plant item in stack) 
                         {
-                            if (item.month > )
+                            if (item.GetMonth() > 2 && item.GetMonth() < 6)
                                 Console.WriteLine("{0}|{1}",++i,item);
                         }
                         Exit();
@@ -93,7 +94,8 @@ namespace Pr2
             }
             while (menu != 9);
 
-            WriteFile(ref sourceStream, ref stack);
+            WriteFile(filename, ref stack);
+            
         }
 
         public static string GetFilename() 
@@ -108,13 +110,18 @@ namespace Pr2
             return filename;
         }
 
-        public static void ReadFile(ref FileStream sourceStream,ref Stack<Plant> stack) 
+        public static void ReadFile(string filename, ref Stack<Plant> stack) 
         {
-            Console.WriteLine("Прочитали файл");
-            Exit();
+            using (FileStream fstream = new FileStream(filename, FileMode.Open))
+            {
+                byte[] array = new byte[fstream.Length];
+                fstream.Read(array, 0, array.Length);
+                Console.WriteLine("Прочитали файл");
+                Exit();
+            }
         }
 
-        public static void WriteFile(ref FileStream sourceStream, ref Stack<Plant> stack) 
+        public static void WriteFile(string filename, ref Stack<Plant> stack) 
         {
             Console.WriteLine("Записали в файл");
             Exit();
