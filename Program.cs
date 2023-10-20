@@ -4,6 +4,14 @@ using System.Drawing;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
+using static System.Net.Mime.MediaTypeNames;
+using System.Text;
+using Microsoft.VisualBasic;
+using System.Dynamic;
+using System.Xml.Linq;
+using System.Numerics;
+using System.Diagnostics;
 
 namespace Pr2
 {
@@ -25,24 +33,36 @@ namespace Pr2
             }
             public override string ToString() 
             {
-                return $"{name, 5} | {allMonths[month], 8} | {seedsAmount} | {price} ";
+                return string.Format("{0:8}|{1:9}|{2:d12}|{3:C2} ", name, allMonths[month], seedsAmount, price); // 8|9|12|6
             }
 
+            public string GetName() { return name; }
             public int GetMonth() { return month; }
+            public int GetSeedsAmount() { return seedsAmount; }
+            public double GetPrice() { return price; }
+
+            public void SetName(string newName) {if(newName != null ) name = newName; }
+            public void SetMonth(int newMonth) { if(newMonth > 0 && newMonth < 13) month = newMonth; }
+            public void SetSeedsAmount(int newAmount) { if(newAmount > 0) seedsAmount = newAmount; }
+            public void SetPrice(double newPrice) { if(newPrice > 0) price = newPrice; }
+
         }
-        static void Main(string[] args) 
+        static void Main(string[] args)
         {
-            string filename = GetFilename(); // получаем имя 
-            Stack<Plant> stack = new Stack<Plant>(); // создаём стэк
-            ReadFile(filename, ref stack); // читаем данные из файла
+            string filename;
+            Stack < Plant > stack = new Stack<Plant>(); // создаём стэк
+            do 
+            {
+                filename = GetFilename();
+            } while (ReadFile(filename, ref stack) < 0); // читаем данные из файла
             int menu;
-            //ConsoleKey btn;
+            int length;
             do
             {
                 Console.Clear();
                 Console.WriteLine("1.Отобразить содержимое стека");
                 Console.WriteLine("2.Записать данные в обратном порядке");
-                Console.WriteLine("3.Добавить новый элемент в начало (в вершину стека)");
+                Console.WriteLine("3.Добавить новый элемент");
                 Console.WriteLine("4.Удалить элемент по индексу");
                 Console.WriteLine("5.Удалить первый элемент (из вершины стека)");
                 Console.WriteLine("6.Корректировать элемент");
@@ -57,9 +77,19 @@ namespace Pr2
                         //Console.WriteLine("Содержимое стека:");
                         Show(ref stack);
                         break;
-                    case 2: 
+                    case 2:
                         //Console.WriteLine("Записали в обратном порядке");
-                        stack.Reverse();
+                        length = stack.Count;
+                        if (length > 0)
+                        {
+                            Stack<Plant> rev = new Stack<Plant>();
+                            while (stack.Count != 0)
+                                rev.Push(stack.Pop());
+                            stack.Clear();
+                            stack = rev;
+                            
+                        }
+                        else Console.WriteLine("Стек пустой");
                         Exit();
                         break;
                     case 3:
@@ -67,27 +97,90 @@ namespace Pr2
                         stack.Push(CreateNewPlant());
                         Exit();
                         break;
-                    case 4:
-                        //Console.WriteLine("Удаляем элемент из вершины стека(с конца)");
-                        Console.WriteLine(stack.Pop());
-                        Exit();
-                        break;
-                    case 5:
-                        Console.WriteLine("Корректируем элемент");
-                        Exit();
-                        break;
-                    case 6:
-                        Console.WriteLine("Высаживаем весной");
-                        int i = 0;
-                        foreach (Plant item in stack) 
+                    case 4: // удалить элемент по индексу
+                        length = stack.Count;
+                        if (length > 0)
                         {
-                            if (item.GetMonth() > 2 && item.GetMonth() < 6)
-                                Console.WriteLine("{0}|{1}",++i,item);
+                            int index = GetIndex(length);
+                            if (index == 0)
+                                stack.Pop();
+                            else 
+                            {
+                                Stack<Plant> tmpStack = new Stack<Plant>();
+                                int j = 0;
+                                while (j++ != index)
+                                    tmpStack.Push(stack.Pop());
+                                Console.WriteLine(stack.Pop());
+                                while (tmpStack.Count > 0)
+                                    stack.Push(tmpStack.Pop());
+                            }
+                            Console.WriteLine("Элемент успешно удалён");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Стек пустой");
+                        }
+                        Exit();
+                        break;
+                    case 5://удалить первый элемент
+                        Console.WriteLine(stack.Pop());
+                        Console.WriteLine("Элемент успешно удалён");
+                        Exit();
+                        break;
+                    case 6: // корректировка эелмента
+                        length = stack.Count;
+                        if (length > 0)
+                        {
+                            int index = GetIndex(length);
+                            Stack<Plant> tmpStack = new Stack<Plant>();
+                            int j = 0;
+                            while (j++ != index)
+                                tmpStack.Push(stack.Pop());
+                            stack.Push(ChangeElement(stack.Pop()));
+                            while (tmpStack.Count > 0)
+                                stack.Push(tmpStack.Pop());
+
+                            Console.WriteLine("Элемент успешно изменён");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Стек пустой");
                         }
                         Exit();
                         break;
                     case 7:
-                        Console.WriteLine("Корректируем цену");
+                        Console.WriteLine("Высаживаем весной");
+                        int i = 0;
+                        foreach (Plant item in stack) 
+                        {
+                            if (item.GetMonth() > 1 && item.GetMonth() < 5)
+                                Console.WriteLine("{0}|{1}",++i,item.GetName());
+                        }
+                        Exit();
+                        break;
+                    case 8:
+                        length = stack.Count;
+                        if (length > 0)
+                        {
+                            int index = GetIndex(length);
+                            if (index == 0)
+                                stack.Pop();
+                            else
+                            {
+                                Stack<Plant> tmpStack = new Stack<Plant>();
+                                int j = 0;
+                                while (j++ != index)
+                                    tmpStack.Push(stack.Pop());
+                                stack.Push(ChangePrice(stack.Pop()));
+                                while (tmpStack.Count > 0)
+                                    stack.Push(tmpStack.Pop());
+                            }
+                            Console.WriteLine("Элемент успешно удалён");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Стек пустой");
+                        }
                         Exit();
                         break;
                 }
@@ -110,20 +203,58 @@ namespace Pr2
             return filename;
         }
 
-        public static void ReadFile(string filename, ref Stack<Plant> stack) 
+        public static int ReadFile(string filename, ref Stack<Plant> stack) 
         {
-            using (FileStream fstream = new FileStream(filename, FileMode.Open))
+            try
             {
-                byte[] array = new byte[fstream.Length];
-                fstream.Read(array, 0, array.Length);
-                Console.WriteLine("Прочитали файл");
-                Exit();
+                using (FileStream fstream = new FileStream(filename, FileMode.Open))
+                {
+                    using (BinaryReader reader = new BinaryReader(fstream))
+                    {
+                        string name;
+                        int month;
+                        int seedsAmount;
+                        double price;
+                        while (reader.BaseStream.Position < reader.BaseStream.Length)
+                        {
+                            name = reader.ReadString();
+                            month = reader.ReadInt32();
+                            seedsAmount = reader.ReadInt32();
+                            price = reader.ReadDouble();
+                            Plant item = new Plant(name, month, seedsAmount, price);
+                            stack.Push(item);
+                        }
+                    }
+                }
             }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("Такого файла нет, но мы его создали");
+            }
+            catch (System.ArgumentException) 
+            {
+                return -1;
+            }
+            Exit();
+            return 0;
         }
 
         public static void WriteFile(string filename, ref Stack<Plant> stack) 
         {
-            Console.WriteLine("Записали в файл");
+            using (FileStream fstream = new FileStream(filename, FileMode.OpenOrCreate))
+            {
+                using (BinaryWriter writer = new BinaryWriter(fstream))
+                {
+                    foreach (Plant plant in stack)
+                    {
+                        writer.Write(plant.GetName());
+                        writer.Write(plant.GetMonth());
+                        writer.Write(plant.GetSeedsAmount());
+                        writer.Write(plant.GetPrice());
+                    }
+                }
+            }
+            Console.WriteLine("Стек успешно сохранён");
             Exit();
         }
 
@@ -131,7 +262,7 @@ namespace Pr2
         {
             ConsoleKeyInfo action;
             Console.Clear();
-            Console.WriteLine("Название|месяц|кол-во семян|цена");
+            Console.WriteLine("Название|  месяц  |кол-во семян| цена "); // 8|9|12|6
             do
             {
                 foreach (var item in stack)
@@ -145,7 +276,7 @@ namespace Pr2
         }
         public static Plant CreateNewPlant() 
         {
-            string name, strTmp;
+            string name;
             int seedsAmount, month;
             double price;
 
@@ -159,9 +290,10 @@ namespace Pr2
             do
             {
                 Console.Clear();
-                Console.WriteLine("Введите месяц посадки (номер месяца / название месяца):");
-                strTmp = Console.ReadLine();
-            } while (strTmp == null || !(Int32.TryParse(strTmp, out month) && month > 0 && month < 13) || (month = allMonths.IndexOf(strTmp)) < 0 );
+                Console.WriteLine("Введите месяц посадки (номер месяца ):");
+                //strTmp = Console.ReadLine();
+                //  || (month = allMonths.IndexOf(strTmp)) < 0
+            } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 0 || month > 13 );
 
             do
             {
@@ -175,10 +307,90 @@ namespace Pr2
                 Console.WriteLine("Введите цену упаковки:");
             } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
 
-            return new Plant(name, month, seedsAmount, price); ;
+            return new Plant(name, --month, seedsAmount, price); ;
         }
 
+        public static Plant ChangeElement(Plant plant)
+        {
+            int menu;
+            string name;
+            int seedsAmount, month;
+            double price;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("1.Изменить название");
+                Console.WriteLine("2.Изменить месяц посадки");
+                Console.WriteLine("3.Изменить количество семян в упаковке");
+                Console.WriteLine("4.Изменить цену");
+                Console.WriteLine("5.Сохранить и вернуться в меню");
+                Int32.TryParse(Console.ReadLine(), out menu);
+                Console.Clear();
+                switch (menu) 
+                {
+                    case 1:
+                        do
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Введите новое название растения:");
+                            name = Console.ReadLine();
+                        } while (name == null || name.Length == 0);
+                        plant.SetName(name);
+                        Exit();
+                        break;
+                    case 2:
+                        do
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Введите новый месяц посадки (номер месяца):");
+                        } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 0 || month > 13);
+                        plant.SetMonth(month);
+                        Exit(); 
+                        break;
+                    case 3:
+                        do
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Введите новое количество семян в упаковке:");
+                        } while (!Int32.TryParse(Console.ReadLine(), out seedsAmount) || seedsAmount < 0);
+                        plant.SetSeedsAmount(seedsAmount);
+                        Exit();
+                        break;
+                    case 4:
+                        do
+                        {
+                            Console.Clear();
+                            Console.WriteLine("Введите новую цену упаковки:");
+                        } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
+                        plant.SetPrice(price);
+                        Exit();
+                        break;
+                }
+            } while (menu != 5);
+            return plant;
+        }
+
+        public static Plant ChangePrice(Plant plant) 
+        {
+            double price;
+            do
+            {
+                Console.Clear();
+                Console.WriteLine("Введите новую цену упаковки:");
+            } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
+            plant.SetPrice(price);
+            return plant;
+        } 
         
+        public static int GetIndex(int length) 
+        {
+            int index;
+            do
+            {
+                Console.WriteLine("Введите номер элемента в списке: ");
+            } while (!Int32.TryParse(Console.ReadLine(), out index) || index < 1 || index > length);
+            return --index;
+        }
 
         public static void Exit() 
         {
