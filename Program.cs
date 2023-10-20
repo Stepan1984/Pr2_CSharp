@@ -87,7 +87,7 @@ namespace Pr2
                                 rev.Push(stack.Pop());
                             stack.Clear();
                             stack = rev;
-                            
+                            Console.WriteLine("Записали в обратном порядке");
                         }
                         else Console.WriteLine("Стек пустой");
                         Exit();
@@ -255,20 +255,19 @@ namespace Pr2
 
         public static void Show(ref Stack<Plant> stack) 
         {
-            ConsoleKeyInfo action;
+            //ConsoleKeyInfo action;
             Console.Clear();
             Console.WriteLine(" № |Название|  месяц  |кол-во семян| цена "); // 3|8|9|12|6
             int i = 0;
-            do
-            {
+            
                 foreach (var item in stack)
                 {
                     Console.WriteLine("{0,3}|{1}",++i,item);
                 }
                 Console.WriteLine("Enter - для возврата в меню");
-                action = Console.ReadKey();
+                //action = 
 
-            } while (action.Key != ConsoleKey.Enter);
+             while ((Console.ReadKey()).Key != ConsoleKey.Enter);
         }
         public static Plant CreateNewPlant() 
         {
