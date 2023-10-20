@@ -33,7 +33,7 @@ namespace Pr2
             }
             public override string ToString() 
             {
-                return string.Format("{0:8}|{1:9}|{2:d12}|{3:C2} ", name, allMonths[month], seedsAmount, price); // 8|9|12|6
+                return string.Format("{0,8}|{1,9}|{2,12:d}|{3,6:F} ", name, allMonths[month], seedsAmount, price); // 8|9|12|6
             }
 
             public string GetName() { return name; }
@@ -148,34 +148,29 @@ namespace Pr2
                         }
                         Exit();
                         break;
-                    case 7:
+                    case 7: // с марта по май
                         Console.WriteLine("Высаживаем весной");
+                        Console.WriteLine("{0,3}|{1,-12}", "№", "название");
                         int i = 0;
                         foreach (Plant item in stack) 
                         {
                             if (item.GetMonth() > 1 && item.GetMonth() < 5)
-                                Console.WriteLine("{0}|{1}",++i,item.GetName());
+                                Console.WriteLine("{0,3}|{1,-12}",++i,item.GetName());
                         }
                         Exit();
                         break;
-                    case 8:
+                    case 8:// корректировка цены
                         length = stack.Count;
                         if (length > 0)
                         {
                             int index = GetIndex(length);
-                            if (index == 0)
-                                stack.Pop();
-                            else
-                            {
-                                Stack<Plant> tmpStack = new Stack<Plant>();
-                                int j = 0;
-                                while (j++ != index)
-                                    tmpStack.Push(stack.Pop());
-                                stack.Push(ChangePrice(stack.Pop()));
-                                while (tmpStack.Count > 0)
-                                    stack.Push(tmpStack.Pop());
-                            }
-                            Console.WriteLine("Элемент успешно удалён");
+                            Stack<Plant> tmpStack = new Stack<Plant>();
+                            int j = 0;
+                            while (j++ != index)
+                                tmpStack.Push(stack.Pop());
+                            stack.Push(ChangePrice(stack.Pop()));
+                            while (tmpStack.Count > 0)
+                                stack.Push(tmpStack.Pop());
                         }
                         else
                         {
