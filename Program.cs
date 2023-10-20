@@ -257,12 +257,13 @@ namespace Pr2
         {
             ConsoleKeyInfo action;
             Console.Clear();
-            Console.WriteLine("Название|  месяц  |кол-во семян| цена "); // 8|9|12|6
+            Console.WriteLine(" № |Название|  месяц  |кол-во семян| цена "); // 3|8|9|12|6
+            int i = 0;
             do
             {
                 foreach (var item in stack)
                 {
-                    Console.WriteLine(item);
+                    Console.WriteLine("{0,3}|{1}",++i,item);
                 }
                 Console.WriteLine("Enter - для возврата в меню");
                 action = Console.ReadKey();
