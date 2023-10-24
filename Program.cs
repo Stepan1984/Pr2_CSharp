@@ -18,6 +18,7 @@ namespace Pr2
     class Program
     {
         static List<string> allMonths = new List<string> {"январь", "февраль", "март", "апрель", "май", "июнь", "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь" };
+        const double EPS = 1e-6;
         public struct Plant 
         {
             string name;
@@ -273,7 +274,7 @@ namespace Pr2
         {
             string name;
             int seedsAmount, month;
-            double price;
+            double price; 
 
             do
             {
@@ -286,23 +287,21 @@ namespace Pr2
             {
                 Console.Clear();
                 Console.WriteLine("Введите месяц посадки (номер месяца ):");
-                //strTmp = Console.ReadLine();
-                //  || (month = allMonths.IndexOf(strTmp)) < 0
-            } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 0 || month > 13 );
+            } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 1 || month > 12 );
 
             do
             {
                 Console.Clear();
                 Console.WriteLine("Введите количество семян в упаковке:");
-            } while (!Int32.TryParse(Console.ReadLine(), out seedsAmount) || seedsAmount < 0);
+            } while (!Int32.TryParse(Console.ReadLine(), out seedsAmount) || seedsAmount < 1);
 
             do
             {
                 Console.Clear();
                 Console.WriteLine("Введите цену упаковки:");
-            } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
+            } while (!Double.TryParse(Console.ReadLine(), out price) || price < EPS);
 
-            return new Plant(name, --month, seedsAmount, price); ;
+            return new Plant(name, --month, seedsAmount, price);
         }
 
         public static Plant ChangeElement(Plant plant)
@@ -338,8 +337,8 @@ namespace Pr2
                         {
                             Console.Clear();
                             Console.WriteLine("Введите новый месяц посадки (номер месяца):");
-                        } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 0 || month > 13);
-                        plant.SetMonth(month);
+                        } while (!Int32.TryParse(Console.ReadLine(), out month) || month < 1 || month > 12);
+                        plant.SetMonth(--month);
                         Exit(); 
                         break;
                     case 3:
@@ -347,7 +346,7 @@ namespace Pr2
                         {
                             Console.Clear();
                             Console.WriteLine("Введите новое количество семян в упаковке:");
-                        } while (!Int32.TryParse(Console.ReadLine(), out seedsAmount) || seedsAmount < 0);
+                        } while (!Int32.TryParse(Console.ReadLine(), out seedsAmount) || seedsAmount < 1);
                         plant.SetSeedsAmount(seedsAmount);
                         Exit();
                         break;
@@ -356,7 +355,7 @@ namespace Pr2
                         {
                             Console.Clear();
                             Console.WriteLine("Введите новую цену упаковки:");
-                        } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
+                        } while (!Double.TryParse(Console.ReadLine(), out price) || price < EPS);
                         plant.SetPrice(price);
                         Exit();
                         break;
@@ -372,7 +371,7 @@ namespace Pr2
             {
                 Console.Clear();
                 Console.WriteLine("Введите новую цену упаковки:");
-            } while (!Double.TryParse(Console.ReadLine(), out price) || price < 0);
+            } while (!Double.TryParse(Console.ReadLine(), out price) || price < EPS);
             plant.SetPrice(price);
             return plant;
         } 
@@ -382,6 +381,7 @@ namespace Pr2
             int index;
             do
             {
+                Console.Clear();
                 Console.WriteLine("Введите номер элемента в списке: ");
             } while (!Int32.TryParse(Console.ReadLine(), out index) || index < 1 || index > length);
             return --index;
